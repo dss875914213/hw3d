@@ -1,5 +1,20 @@
 #include <windows.h>
 
+LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT msg, _In_ WPARAM wParam, _In_ LPARAM lParam)
+{
+	switch (msg)
+	{
+	case WM_CLOSE:
+		PostQuitMessage(69);
+		break;
+
+	default:
+		break;
+	}
+
+	return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
 int CALLBACK WinMain(
 	_In_ HINSTANCE hInstance, 
 	_In_opt_ HINSTANCE hPrevInstance, 
@@ -8,9 +23,9 @@ int CALLBACK WinMain(
 {
 	const char* className = "hw3d";
 	// register window class
-	WNDCLASS wc;
+	WNDCLASS wc = { 0 };
 	wc.style = CS_OWNDC;
-	wc.lpfnWndProc = DefWindowProc;
+	wc.lpfnWndProc = WndProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = hInstance;
@@ -24,7 +39,7 @@ int CALLBACK WinMain(
 	// create window instance
 	HWND hWnd = CreateWindow(className, 
 		"hw3d T2 Test", 
-		WS_CAPTION, 
+		WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
 		200, 200, 400, 300, 
 		NULL,
 		NULL, 
@@ -33,5 +48,22 @@ int CALLBACK WinMain(
 
 	// show the window
 	ShowWindow(hWnd, SW_SHOW);
-	while (1);
+
+	// message pump
+	MSG msg;
+	BOOL bRet;
+	while ((bRet = GetMessage(&msg, nullptr, 0, 0)) > 0)
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	if (bRet == -1)
+	{
+		return -1;
+	}
+	else
+	{
+		return msg.wParam;
+	}
 }
