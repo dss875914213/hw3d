@@ -1,5 +1,8 @@
 #include <windows.h>
 #include "WindowsMessageMap.h"
+#include <string>
+#include <sstream>
+using namespace std;
 
 LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT msg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
@@ -21,6 +24,21 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT msg, _In_ WPARAM wParam, _In_
 		{
 			SetWindowText(hWnd, "F key up");
 		}
+		break;
+	case WM_CHAR:
+	{
+		static string title;
+		title += (char)wParam;
+		SetWindowText(hWnd, title.c_str());
+	}	
+		break;
+	case WM_LBUTTONDOWN:
+	{
+		ostringstream oss;
+		const POINTS pt = MAKEPOINTS(lParam);
+		oss << "(" << pt.x << "," << pt.y << ")";
+		SetWindowText(hWnd, oss.str().c_str());
+	}
 		break;
 	default:
 		break;
