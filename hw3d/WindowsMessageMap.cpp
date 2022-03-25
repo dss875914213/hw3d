@@ -198,11 +198,15 @@ WindowsMessageMap::WindowsMessageMap()
 		REGISTER_MESSAGE(WM_DWMNCRENDERINGCHANGED),
 		REGISTER_MESSAGE(WM_ENTERSIZEMOVE),
 		})
-{}
+{
+	
+}
 
-		WindowsMessageMap::~WindowsMessageMap()
-		{
-		}
+
+WindowsMessageMap::~WindowsMessageMap()
+{
+
+}
 
 std::string WindowsMessageMap::operator()(DWORD msg, LPARAM lp, WPARAM wp) const
 {
