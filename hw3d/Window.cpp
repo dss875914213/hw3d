@@ -1,4 +1,6 @@
 #include "Window.h"
+#include <sstream>
+#include "resource.h"
 
 Window::WindowClass Window::WindowClass::m_wndClass;
 
@@ -12,12 +14,12 @@ Window::WindowClass::WindowClass() noexcept
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = GetInstance();
-	wc.hIcon = nullptr;
+	wc.hIcon = static_cast<HICON>(LoadImage(m_hInst, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 48, 48, 0));
 	wc.hCursor = nullptr;
 	wc.hbrBackground = nullptr;
 	wc.lpszMenuName = nullptr;
 	wc.lpszClassName = GetName();
-	wc.hIconSm = nullptr;
+	wc.hIconSm = static_cast<HICON>(LoadImage(m_hInst, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 16, 16, 0));;
 	RegisterClassEx(&wc);
 }
 
@@ -36,7 +38,7 @@ HINSTANCE Window::WindowClass::GetInstance() noexcept
 	return m_wndClass.m_hInst;
 }
 
-Window::Window(int width, int height, const char* name) noexcept
+Window::Window(int width, int height, const char* name)
 {
 	RECT wr;
 	wr.left = 100;
@@ -45,9 +47,20 @@ Window::Window(int width, int height, const char* name) noexcept
 	wr.bottom = height + wr.top;
 	AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
 
+	//throw CHWND_EXCEPT(ERROR_ARENA_TRASHED);
+	//throw std::runtime_error("butts butts buuuuuuuuuuuuuuuuttsssss");
+	//throw 6969699999999;
+
 	// create window 
 	m_hWnd = CreateWindow(WindowClass::GetName(), name, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
 		CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, WindowClass::GetInstance(), this);
+	
+	// check for error
+	if (m_hWnd == nullptr)
+	{
+		throw CHWND_LAST_EXCEPT();
+	}
+	
 	// show window
 	ShowWindow(m_hWnd, SW_SHOWDEFAULT);
 }
@@ -90,3 +103,53 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 }
 
 
+Window::Exception::Exception(int line, const char* file, HRESULT hr) noexcept
+	:ChiliException(line, file),
+	m_hr(hr)
+{
+
+}
+
+const char* Window::Exception::what() const noexcept
+{
+	std::ostringstream oss;
+	oss << GetType() << std::endl
+		<< "[Error Code] " << GetErrorCode() << std::endl
+		<< "[Description] " << GetErrorString() << std::endl
+		<< GetOriginString();
+	m_whatBuffer = oss.str();
+	return m_whatBuffer.c_str();
+}
+
+const char* Window::Exception::GetType() const noexcept
+{
+	return "Chili Window Exception";
+}
+
+std::string Window::Exception::TranslateErrorCode(HRESULT hr) noexcept
+{
+	char* pMsgBuf = nullptr;
+	DWORD nMsgLen = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		reinterpret_cast<LPSTR>(&pMsgBuf), 0, nullptr);
+
+	if (nMsgLen == 0)
+	{
+		return "Unidentified error code";
+	}
+
+	std::string errorString = pMsgBuf;
+	LocalFree(pMsgBuf);
+	return errorString;
+}
+
+HRESULT Window::Exception::GetErrorCode() const noexcept
+{
+	return m_hr;
+}
+
+std::string Window::Exception::GetErrorString() const noexcept
+{
+	return TranslateErrorCode(m_hr);
+}
