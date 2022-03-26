@@ -1,51 +1,6 @@
-#include <windows.h>
-#include "WindowsMessageMap.h"
-#include <string>
-#include <sstream>
+#include "Window.h"
 using namespace std;
 
-LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT msg, _In_ WPARAM wParam, _In_ LPARAM lParam)
-{
-	static WindowsMessageMap mm;
-	OutputDebugString(mm(msg, lParam, wParam).c_str());
-	switch (msg)
-	{
-	case WM_CLOSE:
-		PostQuitMessage(69);
-		break;
-	case WM_KEYDOWN:
-		if (wParam == 'D')
-		{
-			SetWindowText(hWnd, "D key down");
-		}
-		break;
-	case WM_KEYUP:
-		if (wParam == 'F')
-		{
-			SetWindowText(hWnd, "F key up");
-		}
-		break;
-	case WM_CHAR:
-	{
-		static string title;
-		title += (char)wParam;
-		SetWindowText(hWnd, title.c_str());
-	}	
-		break;
-	case WM_LBUTTONDOWN:
-	{
-		ostringstream oss;
-		const POINTS pt = MAKEPOINTS(lParam);
-		oss << "(" << pt.x << "," << pt.y << ")";
-		SetWindowText(hWnd, oss.str().c_str());
-	}
-		break;
-	default:
-		break;
-	}
-
-	return DefWindowProc(hWnd, msg, wParam, lParam);
-}
 
 int CALLBACK WinMain(
 	_In_ HINSTANCE hInstance, 
@@ -53,33 +8,7 @@ int CALLBACK WinMain(
 	_In_ LPSTR lpCmdLine, 
 	_In_ int nShowCmd)
 {
-	const char* className = "hw3d";
-	// register window class
-	WNDCLASS wc = { 0 };
-	wc.style = CS_OWNDC;
-	wc.lpfnWndProc = WndProc;
-	wc.cbClsExtra = 0;
-	wc.cbWndExtra = 0;
-	wc.hInstance = hInstance;
-	wc.hIcon = NULL;
-	wc.hCursor = NULL;
-	wc.hbrBackground = NULL;
-	wc.lpszMenuName = NULL;
-	wc.lpszClassName = className;
-	RegisterClass(&wc);
-
-	// create window instance
-	HWND hWnd = CreateWindow(className, 
-		"hw3d T2 Test", 
-		WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
-		200, 200, 400, 300, 
-		NULL,
-		NULL, 
-		hInstance,
-		NULL);
-
-	// show the window
-	ShowWindow(hWnd, SW_SHOW);
+	Window wnd(800, 300, "Donkey Fart Box");
 
 	// message pump
 	MSG msg;
@@ -94,8 +23,6 @@ int CALLBACK WinMain(
 	{
 		return -1;
 	}
-	else
-	{
-		return msg.wParam;
-	}
+	
+	return msg.wParam;
 }
