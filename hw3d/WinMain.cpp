@@ -1,4 +1,5 @@
-#include "Window.h"
+#include "App.h"
+#include <sstream>
 
 int CALLBACK WinMain(
 	_In_ HINSTANCE hInstance, 
@@ -8,26 +9,7 @@ int CALLBACK WinMain(
 {
 	try
 	{
-		Window wnd(800, 300, "Donkey Fart Box");
-
-		// message pump
-		MSG msg;
-		BOOL bRet;
-		while ((bRet = GetMessage(&msg, nullptr, 0, 0)) > 0)
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-			if (wnd.m_kbd.KeyIsPressed(VK_MENU))
-			{
-				MessageBox(nullptr, "Something Happened!", "Space Key Was Pressed!", MB_OK);
-			}
-		}
-
-		if (bRet == -1)
-		{
-			throw CHWND_LAST_EXCEPT();
-		}
-		return msg.wParam;
+		return App{}.Go();
 	}
 	catch (const ChiliException& e)
 	{

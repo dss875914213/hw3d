@@ -38,7 +38,3 @@
 #define NOTAPE
 
 #define STRICT
-
-#include <windows.h>
-
-
